@@ -10,14 +10,14 @@ from .random_location import RandomLocation
 logger = logging.getLogger(__name__)
 
 
-class RejectEmpty(BatchFilter):
-    '''Reject batches deemed to be empty (e.g. missing slices) based on the coefficient of variation of the data.
+class RejectConstant(BatchFilter):
+    '''Reject batches deemed to be constant (and thus irrelevant likely due to imperfect data, e.g. missing slices) based on the coefficient of variation of the data.
 
     Args:
 
         array (:class:`ArrayKey`):
 
-            The array to reject empty batches from.
+            The array to reject constant batches from.
 
         min_coefvar (``float``, optional):
 
