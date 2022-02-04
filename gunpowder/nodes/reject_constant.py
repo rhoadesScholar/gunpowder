@@ -36,7 +36,7 @@ class RejectConstant(BatchFilter):
             array,
             min_coefvar=None,
             reject_probability=1.,
-            axis=0
+            axis=1
             ):
 
         self.array = array
