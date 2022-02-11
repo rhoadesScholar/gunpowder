@@ -66,6 +66,10 @@ class Normalize(BatchFilter):
             elif array.data.dtype == np.uint16:
                 factor = 1.0/(256*256-1)
             elif array.data.dtype == np.float32:
+                if array.data.min() < 0 and array.data.min() > -1: # Assume follows tanh activation function (i.e. on [-1, 1])
+                    logger.debug('Normalization assumes data is produced by tanh activation function or similar (i.e. on [-1, 1]).')
+                    array.data += 1
+                    array.data /= 2
                 assert array.data.min() >= 0 and array.data.max() <= 1, (
                         "Values are float but not in [0,1], I don't know how "
                         "to normalize. Please provide a factor.")
