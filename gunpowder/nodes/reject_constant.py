@@ -34,13 +34,13 @@ class RejectConstant(BatchFilter):
     def __init__(
             self,
             array,
-            min_coefvar=None,
+            min_coefvar=True,
             reject_probability=1.,
             axis=1 # should maybe be None
             ):
 
         self.array = array
-        if min_coefvar is None:
+        if min_coefvar is True:
             self.min_coefvar = 1e-04
         else:
             self.min_coefvar = min_coefvar
