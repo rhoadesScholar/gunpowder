@@ -66,7 +66,7 @@ class Normalize(BatchFilter):
             elif array.data.dtype == np.uint16:
                 factor = 1.0/(256*256-1)
             elif array.data.dtype == np.float32:
-                if array.data.min() < 0 and array.data.min() > -1: # Assume follows tanh activation function (i.e. on [-1, 1])
+                if array.data.min() < 0 and array.data.min() >= -1 and array.data.max() <= 1: # Assume follows tanh activation function (i.e. on [-1, 1])
                     logger.debug('Normalization assumes data is produced by tanh activation function or similar (i.e. on [-1, 1]).')
                     array.data += 1
                     array.data /= 2
