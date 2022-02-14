@@ -71,7 +71,10 @@ class RejectConstant(BatchFilter):
             batch = self.upstream_provider.request_batch(request)
             data = batch.arrays[self.array].data.squeeze()
 
-            coefvar = abs(np.std(data, axis=self.axis)) / np.clip(abs(np.mean(data, axis=self.axis)), 1e-10, None) # ensure numerical stability if mean = 0
+            if self.min_coefvar == 0: # use sum.min() == 0 instead
+                coefvar = np.sum(data, axis=self.axis)
+            else:
+                coefvar = abs(np.std(data, axis=self.axis)) / np.clip(abs(np.mean(data, axis=self.axis)), 1e-10, None) # ensure numerical stability if mean = 0
 
             have_good_batch = coefvar.min() > self.min_coefvar
 
