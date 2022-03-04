@@ -286,13 +286,6 @@ class Train(GenericTrain):
                 tensor.grad.cpu().detach().numpy(), spec
             )
 
-        for array_key, array_name in requested_outputs.items():
-            spec = self.spec[array_key].copy()
-            spec.roi = request[array_key].roi
-            batch.arrays[array_key] = Array(
-                outputs[array_name].cpu().detach().numpy(), spec
-            )
-
         batch.loss = loss.cpu().detach().numpy()
         self.iteration += 1
         batch.iteration = self.iteration
@@ -318,6 +311,7 @@ class Train(GenericTrain):
             if hasattr(self.loss, 'loss_dict'):
                 for key, loss in self.loss.loss_dict.items():
                     self.summary_writer.add_scalar(key, loss, batch.iteration)
+                        
             for array in self.loss_inputs.values():
                 if len(batch[array].data.shape) > 3: # pull out batch dimension if necessary
                     img = batch[array].data[0].squeeze()
@@ -328,6 +322,8 @@ class Train(GenericTrain):
                     data = img[mid]
                 else:
                     data = img
+                if (data.dtype == np.float32) and (data.min() < 0) and (data.min() >= -1.) and (data.max() <= 1.): # scale data to [0,1] if necessary
+                    data = (data * 0.5) + 0.5
                 self.summary_writer.add_image(array.identifier, data, global_step=batch.iteration, dataformats='HW')
 
     def __collect_requested_outputs(self, request):
