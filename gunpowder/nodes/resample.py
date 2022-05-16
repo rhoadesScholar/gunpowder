@@ -83,6 +83,9 @@ class Resample(BatchFilter):
             np.lcm(source_voxel_size, self.target_voxel_size),
             mode='grow')
         source_request.roi = source_request.roi.intersect(self.spec[self.source].roi) # Ensure request doesn't extend beyond available volume
+        source_request.roi = source_request.roi.snap_to_grid( # Ensure it's on grid
+            np.lcm(source_voxel_size, self.target_voxel_size),
+            mode='shrink')
 
         deps = BatchRequest()
         deps[self.source] = source_request
