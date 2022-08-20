@@ -306,25 +306,17 @@ class Train(GenericTrain):
                 checkpoint_name,
             )
 
+        for module in [self.model, self.loss, self.optimizer]:
+            if hasattr(module, 'update_status'):
+                module.update_status(batch.iteration)
+
         if self.summary_writer and batch.iteration % self.log_every == 0:
             self.summary_writer.add_scalar("loss", batch.loss, batch.iteration)
-            if hasattr(self.loss, 'loss_dict'):
-                for key, loss in self.loss.loss_dict.items():
-                    self.summary_writer.add_scalar(key, loss, batch.iteration)
-                        
-            for array in self.loss_inputs.values():
-                if len(batch[array].data.shape) > 3: # pull out batch dimension if necessary
-                    img = batch[array].data[0].squeeze()
-                else:
-                    img = batch[array].data.squeeze()
-                if len(img.shape) == 3:
-                    mid = img.shape[0] // 2 # for 3D volume
-                    data = img[mid]
-                else:
-                    data = img
-                if (data.dtype == np.float32) and (data.min() < 0) and (data.min() >= -1.) and (data.max() <= 1.): # scale data to [0,1] if necessary
-                    data = (data * 0.5) + 0.5
-                self.summary_writer.add_image(array.identifier, data, global_step=batch.iteration, dataformats='HW')
+            
+            for module in [self.model, self.loss, self.optimizer]:
+                if hasattr(module, 'add_log'):
+                    module.add_log(self.summary_writer, batch.iteration)
+    
 
     def __collect_requested_outputs(self, request):
 
