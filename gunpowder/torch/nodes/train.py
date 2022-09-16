@@ -76,7 +76,7 @@ class Train(GenericTrain):
             After how many iterations to write out tensorboard summaries.
 
         spawn_subprocess (``bool``, optional):
-        
+
             Whether to run the ``train_step`` in a separate process. Default is false.
     """
 
@@ -250,13 +250,12 @@ class Train(GenericTrain):
 
         self.retain_gradients(request, outputs)
 
-        logger.debug(
-            "model outputs: %s",
-            {k: v.shape for k, v in outputs.items()})
+        logger.debug("model outputs: %s", {k: v.shape for k, v in outputs.items()})
         logger.debug(
             "loss inputs: %s %s",
             [v.shape for v in device_loss_args],
-            {k: v.shape for k, v in device_loss_kwargs.items()})
+            {k: v.shape for k, v in device_loss_kwargs.items()},
+        )
         loss = self.loss(*device_loss_args, **device_loss_kwargs)
         loss.backward()
         self.optimizer.step()
@@ -282,9 +281,7 @@ class Train(GenericTrain):
                 )
             spec = self.spec[array_key].copy()
             spec.roi = request[array_key].roi
-            batch.arrays[array_key] = Array(
-                tensor.grad.cpu().detach().numpy(), spec
-            )
+            batch.arrays[array_key] = Array(tensor.grad.cpu().detach().numpy(), spec)
 
         for array_key, array_name in requested_outputs.items():
             spec = self.spec[array_key].copy()
@@ -315,6 +312,10 @@ class Train(GenericTrain):
 
         if self.summary_writer and batch.iteration % self.log_every == 0:
             self.summary_writer.add_scalar("loss", batch.loss, batch.iteration)
+
+            for module in [self.model, self.loss, self.optimizer]:
+                if hasattr(module, "add_log"):
+                    module.add_log(self.summary_writer, batch.iteration)
 
     def __collect_requested_outputs(self, request):
 
