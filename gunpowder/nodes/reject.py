@@ -41,7 +41,9 @@ class Reject(BatchFilter):
         self.mask = mask
         self.min_masked = min_masked
         self.ensure_nonempty = ensure_nonempty
-        self.reject_probability = reject_probability
+        self.reject_probability = (
+            reject_probability  # set to None to weight based on mask ratio
+        )
 
     def setup(self):
         if self.mask:
@@ -55,7 +57,6 @@ class Reject(BatchFilter):
         self.upstream_provider = self.get_upstream_provider()
 
     def provide(self, request):
-
         report_next_timeout = 10
         num_rejected = 0
 
@@ -89,8 +90,11 @@ class Reject(BatchFilter):
 
             have_good_batch = have_min_mask and have_points
 
-            if not have_good_batch and self.reject_probability < 1.0:
-                have_good_batch = random.random() > self.reject_probability
+            if not have_good_batch:
+                if self.reject_probability is None:
+                    have_good_batch = random.random() < (mask_ratio / self.min_masked)
+                elif self.reject_probability < 1.0:
+                    have_good_batch = random.random() > self.reject_probability
 
             if not have_good_batch:
                 if self.mask:
