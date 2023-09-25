@@ -55,9 +55,14 @@ class Array(Freezable):
                     )
 
         if spec.dtype is not None:
-            assert (
-                data.dtype == spec.dtype
-            ), "data dtype %s does not match spec dtype %s" % (data.dtype, spec.dtype)
+            if data.dtype != spec.dtype:
+                logger.warning(
+                    "data dtype %s does not match spec dtype %s"
+                    % (data.dtype, spec.dtype)
+                )
+                self.data = self.data.astype(
+                    spec.dtype
+                )  # TODO: sloppy cast to patch up dtype mismatch
 
         self.freeze()
 

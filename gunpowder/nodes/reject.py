@@ -36,14 +36,16 @@ class Reject(BatchFilter):
     """
 
     def __init__(
-        self, mask=None, min_masked=0.5, ensure_nonempty=None, reject_probability=1.0
+        self,
+        mask=None,
+        min_masked=0.5,
+        ensure_nonempty=None,
+        reject_probability=1.0,  # set to None to weight based on mask ratio
     ):
         self.mask = mask
         self.min_masked = min_masked
         self.ensure_nonempty = ensure_nonempty
-        self.reject_probability = (
-            reject_probability  # set to None to weight based on mask ratio
-        )
+        self.reject_probability = reject_probability
 
     def setup(self):
         if self.mask:
